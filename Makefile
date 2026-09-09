@@ -1,4 +1,6 @@
-.PHONY: up down reset logs status smoke smoke-v2 obs-up obs-down obs-status all-up all-down chaos-mongo recover-mongo
+.PHONY: up down reset logs status smoke smoke-v2 obs-up obs-down obs-status all-up all-down chaos-mongo recover-mongo adr-new adr-list
+
+ADR_TOOLS_DIR := .tools/adr-tools
 
 up:
 	docker compose up --build -d --wait
@@ -40,3 +42,14 @@ chaos-mongo:
 
 recover-mongo:
 	docker compose up -d --wait mongo audit-api
+
+$(ADR_TOOLS_DIR):
+	git clone --depth 1 https://github.com/npryce/adr-tools.git $(ADR_TOOLS_DIR)
+
+# Uso: make adr-new TITLE="Usar Kafka para eventos de dominio"
+adr-new: $(ADR_TOOLS_DIR)
+	@test -n "$(TITLE)" || (echo "Uso: make adr-new TITLE=\"Titulo de la decision\"" && exit 1)
+	PATH="$(ADR_TOOLS_DIR)/src:$$PATH" adr new $(TITLE)
+
+adr-list: $(ADR_TOOLS_DIR)
+	PATH="$(ADR_TOOLS_DIR)/src:$$PATH" adr list

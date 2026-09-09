@@ -7,3 +7,4 @@ target/
 .DS_Store
 *.zip
 creation.log
+.tools/
