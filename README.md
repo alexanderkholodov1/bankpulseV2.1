@@ -43,6 +43,17 @@ La V2 aplica **single-writer ownership**. Compartir un motor fisico en Codespace
 
 Consulte `docs/architecture/DATA-OWNERSHIP.md` y use `docs/adr/ADR-TEMPLATE-DATA-OWNERSHIP.md` como entregable de equipo.
 
+## ADR (Architecture Decision Records)
+
+Las decisiones de arquitectura ya tomadas (database-per-service, Redis solo como TTL en `events-api`, Transactional Outbox en `payments-api`, etc.) se documentan como ADRs numerados en `docs/adr/`, usando [adr-tools](https://github.com/npryce/adr-tools) de Nat Pryce (formato de Michael Nygard: Status / Context / Decision / Consequences).
+
+```bash
+make adr-list                              # lista los ADR vigentes
+make adr-new TITLE="Usar Kafka para eventos de dominio"   # crea el siguiente ADR numerado
+```
+
+`make` descarga `adr-tools` una sola vez en `.tools/adr-tools` (ignorado por git). El job `adr-check` de CI corre en cada push/PR: valida que cada ADR tenga las cuatro secciones del template, y falla el PR si se toca `services/` o `docs/architecture/` sin agregar ni actualizar un ADR — así ninguna decision de arquitectura llega a `main` sin estar justificada.
+
 ## Inicio rapido en GitHub Codespaces
 
 El Dev Container incluye el fix de Yarn requerido por Docker-in-Docker:
@@ -107,10 +118,11 @@ Prometheus scrapea `/actuator/prometheus` de los seis microservicios. El dashboa
 
 ## CI
 
-`.github/workflows/ci.yml` implementa dos puertas:
+`.github/workflows/ci.yml` implementa tres puertas:
 
-1. **Architecture contract:** verifica la existencia de los seis servicios, ownership docs y Compose/observabilidad validos.
-2. **Integration test:** construye el stack real, ejecuta `smoke-v2.sh`, levanta Prometheus/Grafana y valida sus health endpoints.
+1. **ADR governance:** valida que cada ADR en `docs/adr/` tenga Status/Context/Decision/Consequences, y que todo PR que toque `services/` o `docs/architecture/` incluya su ADR correspondiente.
+2. **Architecture contract:** verifica la existencia de los seis servicios, ownership docs y Compose/observabilidad validos.
+3. **Integration test:** construye el stack real, ejecuta `smoke-v2.sh`, levanta Prometheus/Grafana y valida sus health endpoints.
 
 Flujo esperado:
 
